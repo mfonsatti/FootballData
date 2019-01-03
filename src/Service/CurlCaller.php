@@ -18,18 +18,9 @@ use Psr\Cache\CacheItemPoolInterface;
 abstract class CurlCaller
 {
     /**
-     * @var RunningMode
-     */
-    protected $mode;
-    /**
      * @var CacheItemPoolInterface
      */
     protected $cache;
-
-    /**
-     * @param RunningMode $mode
-     */
-    abstract public function setRunningMode(RunningMode $mode);
 
     /**
      * @param string $result
@@ -81,21 +72,11 @@ abstract class CurlCaller
     /**
      * Rest constructor.
      *
-     * @param RunningMode $mode
      * @param CacheItemPoolInterface $cache
      */
-    public function __construct(RunningMode $mode, CacheItemPoolInterface $cache)
+    public function __construct(CacheItemPoolInterface $cache)
     {
         $this->cache = $cache;
-        $this->setRunningMode($mode);
-    }
-
-    /**
-     * @return RunningMode
-     */
-    public function getRunningMode(): RunningMode
-    {
-        return $this->mode;
     }
 
     /**
