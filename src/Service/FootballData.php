@@ -20,7 +20,7 @@ class FootballData
     /**
      * @var string
      */
-    private $apiToken;
+    protected $apiToken;
 
     /**
      * @var string

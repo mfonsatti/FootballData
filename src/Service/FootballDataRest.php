@@ -8,6 +8,8 @@
 
 namespace App\Service;
 
+use App\Exception\FootballDataException;
+
 /**
  * Class FootballDataRest
  * @package App\Service
@@ -15,14 +17,45 @@ namespace App\Service;
 class FootballDataRest extends CurlCaller
 {
     /**
+     * @var string
+     */
+    protected $apiToken;
+
+    /**
+     * @var string
+     */
+    protected $baseUrl;
+
+    /**
+     * FootballDataRest constructor.
+     *
+     * @param $apiToken
+     * @param $baseUrl
+     */
+    public function __construct($apiToken, $baseUrl)
+    {
+        $this->apiToken = $apiToken;
+        $this->baseUrl = $baseUrl;
+    }
+
+    /**
      * @param string $result
-     * @param bool $checkSuccess
      *
      * @return array
+     * @throws FootballDataException
      */
-    protected function decodeResult(string $result, $checkSuccess): array
+    protected function decodeResult(string $result): array
     {
-        // TODO: Implement decodeResult() method.
+        $response = json_decode($result, true);
+        if (isset($response['error'])) {
+            throw FootballDataException::invalidEntryPoint($response);
+        }
+
+        if (isset($response['errorCode'])){
+            throw FootballDataException::invaliApiToken($response);
+        }
+
+        return $response;
     }
 
     /**
@@ -31,36 +64,8 @@ class FootballDataRest extends CurlCaller
      */
     protected function initCurlGet($curl, array &$headers): void
     {
-        // TODO: Implement initCurlGet() method.
-    }
-
-    /**
-     * @param resource $curl
-     * @param array $headers
-     */
-    protected function initCurlDelete($curl, array &$headers): void
-    {
-        // TODO: Implement initCurlDelete() method.
-    }
-
-    /**
-     * @param resource $curl
-     * @param array $data
-     * @param array $headers
-     */
-    protected function initCurlPost($curl, array $data, array &$headers): void
-    {
-        // TODO: Implement initCurlPost() method.
-    }
-
-    /**
-     * @param resource $curl
-     * @param array $data
-     * @param array $headers
-     */
-    protected function initCurlPut($curl, array $data, array &$headers): void
-    {
-        // TODO: Implement initCurlPut() method.
+        $headers[] = 'Content-type: application/json';
+        $headers[] = 'X-Auth-Token: ' . $this->apiToken;
     }
 
     /**
@@ -79,6 +84,6 @@ class FootballDataRest extends CurlCaller
      */
     protected function composeURL(string $entryPoint): string
     {
-        // TODO: Implement composeURL() method.
+        return $this->baseUrl . $entryPoint;
     }
 }

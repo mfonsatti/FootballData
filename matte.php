@@ -11,8 +11,8 @@ require __DIR__ .'/vendor/autoload.php';
 $kernel = new \App\Kernel('dev', false);
 $kernel->boot();
 $container = $kernel->getContainer();
-/** @var \App\Service\FootballData $footballData */
-$footballData = $container->get('App\Service\FootballData');
-$matches = $footballData->curl('/matches');
+/** @var \App\Service\FootballDataRest $footballData */
+$footballData = $container->get('App\Service\FootballDataRest');
+$matches = $footballData->doGet('matches');
 $test = true;
 

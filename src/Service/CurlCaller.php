@@ -18,43 +18,32 @@ use Psr\Cache\CacheItemPoolInterface;
 abstract class CurlCaller
 {
     /**
+     * @var string
+     */
+    protected $apiToken;
+
+    /**
+     * @var string
+     */
+    protected $baseUrl;
+
+    /**
      * @var CacheItemPoolInterface
      */
     protected $cache;
 
     /**
      * @param string $result
-     * @param bool $checkSuccess
      *
      * @return array
      */
-    abstract protected function decodeResult(string $result, $checkSuccess): array;
+    abstract protected function decodeResult(string $result): array;
 
     /**
      * @param resource $curl
      * @param array $headers
      */
     abstract protected function initCurlGet($curl, array &$headers): void;
-
-    /**
-     * @param resource $curl
-     * @param array $headers
-     */
-    abstract protected function initCurlDelete($curl, array &$headers): void;
-
-    /**
-     * @param resource $curl
-     * @param array $data
-     * @param array $headers
-     */
-    abstract protected function initCurlPost($curl, array $data, array &$headers): void;
-
-    /**
-     * @param resource $curl
-     * @param array $data
-     * @param array $headers
-     */
-    abstract protected function initCurlPut($curl, array $data, array &$headers): void;
 
     /**
      * @param $curl
@@ -82,69 +71,16 @@ abstract class CurlCaller
     /**
      * @param string $entryPoint
      * @param array $headers
-     * @param bool $checkSuccess
      *
      * @return mixed
      * @throws CurlException
      */
-    public function doGet(string $entryPoint, array $headers = [], bool $checkSuccess = true)
+    public function doGet(string $entryPoint, array $headers = [])
     {
         $curl = $this->curl($entryPoint);
         $this->initCurlGet($curl, $headers);
 
-        return $this->request($curl, $headers, $checkSuccess);
-    }
-
-    /**
-     * @param string $entryPoint
-     * @param array $headers
-     * @param bool $checkSuccess
-     *
-     * @return mixed
-     * @throws CurlException
-     */
-    public function doDelete(string $entryPoint, array $headers = [], bool $checkSuccess = true)
-    {
-        $curl = $this->curl($entryPoint);
-        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "DELETE");
-        $this->initCurlDelete($curl, $headers);
-
-        return $this->request($curl, $headers, $checkSuccess);
-    }
-
-    /**
-     * @param string $entryPoint
-     * @param array $data
-     * @param array $headers
-     * @param bool $checkSuccess
-     *
-     * @return mixed
-     * @throws CurlException
-     */
-    public function doPost(string $entryPoint, array $data, array $headers = [], bool $checkSuccess = true)
-    {
-        $curl = $this->curl($entryPoint);
-        $this->initCurlPost($curl, $data, $headers);
-
-        return $this->request($curl, $headers, $checkSuccess);
-    }
-
-    /**
-     * @param string $entryPoint
-     * @param array $data
-     * @param array $headers
-     * @param bool $checkSuccess
-     *
-     * @return mixed
-     * @throws CurlException
-     */
-    public function doPut(string $entryPoint, array $data, array $headers = [], bool $checkSuccess = true)
-    {
-        $curl = $this->curl($entryPoint);
-        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PUT");
-        $this->initCurlPut($curl, $data, $headers);
-
-        return $this->request($curl, $headers, $checkSuccess);
+        return $this->request($curl, $headers);
     }
 
     /**
@@ -168,12 +104,11 @@ abstract class CurlCaller
     /**
      * @param resource $curl
      * @param array $headers
-     * @param bool $checkSuccess
      *
      * @return mixed
      * @throws CurlException
      */
-    protected function request($curl, $headers, $checkSuccess)
+    protected function request($curl, $headers)
     {
         $this->beforeRequest($curl, $headers);
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
@@ -182,7 +117,7 @@ abstract class CurlCaller
         if (200 <= $code and $code <= 299) {
             curl_close($curl);
 
-            return $this->decodeResult($result, $checkSuccess);
+            return $this->decodeResult($result);
         }
         throw new CurlException($curl, $result);
     }
