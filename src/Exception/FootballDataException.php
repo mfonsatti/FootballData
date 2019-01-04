@@ -15,17 +15,38 @@ namespace App\Exception;
 class FootballDataException extends \Exception
 {
     /**
+     * FootballDataException constructor.
+     *
+     * @param array $response
+     */
+    public function __construct(array $response)
+    {
+        parent::__construct($response['message'], $response['code']);
+    }
+
+    /**
      * @param $response
      *
      * @return FootballDataException
      */
     public static function invalidEntryPoint($response): self
     {
-
+        return new self([
+            'Your request was malformed',
+            $response['error']
+        ]);
     }
 
+    /**
+     * @param $response
+     *
+     * @return FootballDataException
+     */
     public static function invaliApiToken($response): self
     {
-
+        return new self([
+            $response['message'],
+            $response['errorCode']
+        ]);
     }
 }
