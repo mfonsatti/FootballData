@@ -13,7 +13,7 @@ use Psr\Cache\CacheItemPoolInterface;
 
 /**
  * Class CurlCaller
- * @package App
+ * @package App\Service
  */
 abstract class CurlCaller
 {
@@ -115,7 +115,10 @@ abstract class CurlCaller
      */
     protected function setResponseHeader($curl, $header)
     {
-        $this->responseHeader[] = $header;
+        if ($curl) {
+            $this->responseHeader[] = $header;
+        }
+
         return strlen($header);
     }
 
