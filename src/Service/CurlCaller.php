@@ -33,6 +33,11 @@ abstract class CurlCaller
     protected $cache;
 
     /**
+     * @var array
+     */
+    protected $responseHeader = [];
+
+    /**
      * @param string $result
      *
      * @return array
@@ -92,6 +97,7 @@ abstract class CurlCaller
     {
         $curl = curl_init();
         curl_setopt_array($curl, [
+            CURLOPT_HEADERFUNCTION => [$this, 'setResponseHeader'],
             CURLOPT_RETURNTRANSFER => 1,
             CURLOPT_SSLVERSION     => 6,
             CURLINFO_HEADER_OUT    => 1,
@@ -99,6 +105,18 @@ abstract class CurlCaller
         ]);
 
         return $curl;
+    }
+
+    /**
+     * @param $curl
+     * @param $header
+     *
+     * @return int
+     */
+    protected function setResponseHeader($curl, $header)
+    {
+        $this->responseHeader[] = $header;
+        return strlen($header);
     }
 
     /**
@@ -112,13 +130,14 @@ abstract class CurlCaller
     {
         $this->beforeRequest($curl, $headers);
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-        $result = curl_exec($curl);
+        $response = curl_exec($curl);
         $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
         if (200 <= $code and $code <= 299) {
             curl_close($curl);
 
-            return $this->decodeResult($result);
+            return $this->decodeResult($response);
         }
-        throw new CurlException($curl, $result);
+        throw new CurlException($curl, $response);
     }
 }
